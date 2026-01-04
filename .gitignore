@@ -1,0 +1,55 @@
+# Omniverse
+**/*.dmp
+**/.thumbs
+
+# Python
+.DS_Store
+**/*.egg-info/
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc
+**/*.pb
+
+# IDE
+**/.idea/
+**/.vscode/
+# Don't ignore the top-level .vscode directory
+!.vscode
+
+# Outputs
+**/runs/*
+**/logs/*
+**/recordings/*
+**/output/*
+**/outputs/*
+**/videos/*
+**/wandb/*
+**/.neptune/*
+docker/artifacts/
+*.tmp
+
+# Isaac-Sim packman
+_isaac_sim*
+_repo
+_build
+.lastformat
+
+# ========== 训练相关补充 ==========
+
+# 模型文件（checkpoint）
+**/*.pt
+**/*.pth
+**/*.onnx
+
+# USD资产文件（3D模型资源，非常大）
+**/*.usd
+**/*.usda
+**/*.usdc
+
+# 日志文件
+**/*.log
+**/nohup.out
+
+# 训练进程文件
+**/*_pid.txt
+EOF
