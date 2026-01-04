@@ -377,16 +377,22 @@ class EventsCfg:
     push_robot = EventTerm(
         func=mdp.apply_external_force_torque_stochastic,  # 随机外力扰动 / Stochastic external force disturbance
         mode="interval",                            # 间隔模式 / Interval mode
-        interval_range_s=(0.0, 0.0),               # 间隔时间范围 / Interval time range
+        interval_range_s=(5.0, 10.0),               # 间隔时间范围 / Interval time range
         params={
             "asset_cfg": SceneEntityCfg("robot", body_names="base_Link"),
             # 力的范围 [N] / Force range [N]
-            "force_range": {
-                "x": (-500.0, 500.0), "y": (-500.0, 500.0), "z": (-0.0, 0.0),
-            },
+          "force_range": {
+              "x": (-600.0, 600.0),  # 增大到800N（更强的推力）
+              "y": (-600.0, 600.0),
+              "z": (-0.0, 0.0),
+          },
             # 力矩范围 [N⋅m] / Torque range [N⋅m]
-            "torque_range": {"x": (-50.0, 50.0), "y": (-50.0, 50.0), "z": (-0.0, 0.0)},
-            "probability": 0.002,                   # 发生概率 / Occurrence probability
+          "torque_range": {
+              "x": (-60.0, 60.0),    # 增大到80N⋅m
+              "y": (-60.0, 60.0),
+              "z": (-0.0, 0.0)
+          },            
+          "probability": 0.3,                   # 发生概率 / Occurrence probability
         },
         is_global_time=False,
         min_step_count_between_reset=0,
