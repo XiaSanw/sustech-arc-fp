@@ -1,78 +1,99 @@
-"""量化评估脚本 - 计算MSE、姿态稳定性、存活率 / Quantitative evaluation script"""
+"""终极评估脚本 - 完全避免torchvision导入问题"""
 
 import argparse
 import os
+import sys
 import torch
 import numpy as np
 import pandas as pd
+
+# 手动添加项目路径到sys.path
+project_root = "/personal/limxtron1lab-main"
+sys.path.insert(0, os.path.join(project_root, "exts/bipedal_locomotion"))
+
 from isaaclab.app import AppLauncher
 
-# 解析参数
 parser = argparse.ArgumentParser()
-parser.add_argument("--task", type=str, default=None, help="Task name")
-parser.add_argument("--checkpoint_path", type=str, default=None, help="Checkpoint path")
-parser.add_argument("--num_envs", type=int, default=100, help="Number of evaluation environments")
-parser.add_argument("--eval_steps", type=int, default=3000, help="Evaluation steps (~60 seconds @ 50Hz)")
+parser.add_argument("--checkpoint", type=str, required=True)
+parser.add_argument("--num_envs", type=int, default=100)
+parser.add_argument("--eval_steps", type=int, default=3000)
 
-import cli_args
-cli_args.add_rsl_rl_args(parser)
 AppLauncher.add_app_launcher_args(parser)
 args_cli = parser.parse_args()
-args_cli.headless = True  # 强制headless模式
+args_cli.headless = True
+args_cli.device = "cuda:0"
 
 app_launcher = AppLauncher(args_cli)
 simulation_app = app_launcher.app
 
+# 现在开始导入（AppLauncher之后）
 import gymnasium as gym
 from rsl_rl.runner import OnPolicyRunner
-from isaaclab_tasks.utils import get_checkpoint_path, parse_env_cfg
 from isaaclab_rl.rsl_rl import RslRlVecEnvWrapper
-import bipedal_locomotion
+
+# 直接导入配置类（绕过包的__init__.py）
+from bipedal_locomotion.tasks.locomotion.robots.limx_pointfoot_env_cfg import (
+    PFBlindFlatEnvCfg_PLAY
+)
+from bipedal_locomotion.tasks.locomotion.agents.limx_rsl_rl_ppo_cfg import (
+    PF_TRON1AFlatPPORunnerCfg
+)
+
+# 手动注册环境（避免导入整个bipedal_locomotion包）
+if "Isaac-Limx-PF-Blind-Flat-Play-v0" not in gym.envs.registry:
+    gym.register(
+        id="Isaac-Limx-PF-Blind-Flat-Play-v0",
+        entry_point="isaaclab.envs:ManagerBasedRLEnv",
+        disable_env_checker=True,
+        kwargs={
+            "env_cfg_entry_point": PFBlindFlatEnvCfg_PLAY,
+            "rsl_rl_cfg_entry_point": PF_TRON1AFlatPPORunnerCfg(),
+        },
+    )
 
 def main():
-    # 解析环境配置
-    env_cfg = parse_env_cfg(task_name=args_cli.task, device=args_cli.device, num_envs=args_cli.num_envs)
-    agent_cfg = cli_args.parse_rsl_rl_cfg(args_cli.task, args_cli)
-
-    # 加载checkpoint
-    if args_cli.checkpoint_path is None:
-        log_root_path = os.path.join("logs", "rsl_rl", agent_cfg.experiment_name)
-        resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, agent_cfg.load_checkpoint)
-    else:
-        resume_path = args_cli.checkpoint_path
+    checkpoint_path = args_cli.checkpoint
 
     print(f"\n{'='*80}")
     print(f"🎯 任务2.2量化评估 / Task 2.2 Quantitative Evaluation")
     print(f"{'='*80}")
-    print(f"Checkpoint: {resume_path}")
+    print(f"Checkpoint: {checkpoint_path}")
     print(f"Environments: {args_cli.num_envs}")
     print(f"Evaluation steps: {args_cli.eval_steps} (~{args_cli.eval_steps*0.02:.1f} seconds)")
     print(f"{'='*80}\n")
 
+    # 创建环境配置
+    env_cfg = PFBlindFlatEnvCfg_PLAY()
+    env_cfg.scene.num_envs = args_cli.num_envs
+
+    # 创建agent配置
+    agent_cfg = PF_TRON1AFlatPPORunnerCfg()
+    agent_cfg.device = args_cli.device
+
     # 创建环境
-    env = gym.make(args_cli.task, cfg=env_cfg, render_mode=None)
+    print("[INFO]: Creating environment...")
+    env = gym.make("Isaac-Limx-PF-Blind-Flat-Play-v0", cfg=env_cfg, render_mode=None)
     env = RslRlVecEnvWrapper(env)
 
     # 加载policy
+    print(f"[INFO]: Loading checkpoint from: {checkpoint_path}")
     ppo_runner = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
-    ppo_runner.load(resume_path)
+    ppo_runner.load(checkpoint_path)
     policy = ppo_runner.get_inference_policy(device=env.unwrapped.device)
     encoder = ppo_runner.get_inference_encoder(device=env.unwrapped.device)
 
-    # 初始化记录数组
+    # 初始化记录
     velocity_errors = []
     orientation_errors = []
     termination_counts = 0
     total_steps = 0
 
-    # 重置环境
     obs, obs_dict = env.get_observations()
     obs_history = obs_dict["observations"].get("obsHistory").flatten(start_dim=1)
     commands = obs_dict["observations"].get("commands")
 
-    print("开始评估... / Starting evaluation...")
+    print("开始评估... / Starting evaluation...\n")
 
-    # 评估循环
     for step in range(args_cli.eval_steps):
         with torch.inference_mode():
             est = encoder(obs_history)
@@ -81,49 +102,44 @@ def main():
             obs_history = infos["observations"].get("obsHistory").flatten(start_dim=1)
             commands = infos["observations"].get("commands")
 
-        # 获取机器人状态
         robot = env.unwrapped.scene["robot"]
 
-        # 1. 速度跟踪误差 (MSE)
-        actual_lin_vel = robot.data.root_lin_vel_w[:, :2]  # (num_envs, 2) - vx, vy
-        actual_ang_vel = robot.data.root_ang_vel_w[:, 2:3]  # (num_envs, 1) - omega_z
+        # 1. 速度跟踪误差
+        actual_lin_vel = robot.data.root_lin_vel_w[:, :2]
+        actual_ang_vel = robot.data.root_ang_vel_w[:, 2:3]
 
-        cmd_lin_vel = commands[:, :2]  # 前两维是线速度命令
-        cmd_ang_vel = commands[:, 2:3]  # 第三维是角速度命令
+        cmd_lin_vel = commands[:, :2]
+        cmd_ang_vel = commands[:, 2:3]
 
-        lin_vel_error = torch.mean((actual_lin_vel - cmd_lin_vel) ** 2, dim=1)  # (num_envs,)
-        ang_vel_error = ((actual_ang_vel - cmd_ang_vel) ** 2).squeeze(1)  # (num_envs,)
+        lin_vel_error = torch.mean((actual_lin_vel - cmd_lin_vel) ** 2, dim=1)
+        ang_vel_error = ((actual_ang_vel - cmd_ang_vel) ** 2).squeeze(1)
 
         velocity_errors.append(torch.cat([lin_vel_error.unsqueeze(1),
                                         ang_vel_error.unsqueeze(1)], dim=1).cpu().numpy())
 
-        # 2. 姿态稳定性 (Roll/Pitch震荡)
-        base_quat = robot.data.root_quat_w  # (num_envs, 4) - [x, y, z, w]
+        # 2. 姿态稳定性
+        base_quat = robot.data.root_quat_w
 
-        # 将四元数转换为欧拉角 (roll, pitch, yaw)
-        # 使用Isaac Lab的工具函数
         from isaaclab.utils.math import quat_to_euler_xyz
-        euler_angles = quat_to_euler_xyz(base_quat)  # (num_envs, 3) - [roll, pitch, yaw]
+        euler_angles = quat_to_euler_xyz(base_quat)
 
-        roll = torch.abs(euler_angles[:, 0])  # Roll绝对值
-        pitch = torch.abs(euler_angles[:, 1])  # Pitch绝对值
+        roll = torch.abs(euler_angles[:, 0])
+        pitch = torch.abs(euler_angles[:, 1])
 
         orientation_errors.append(torch.stack([roll, pitch], dim=1).cpu().numpy())
 
-        # 3. 存活率 (摔倒检测)
+        # 3. 存活率
         termination_counts += torch.sum(dones).item()
         total_steps += args_cli.num_envs
 
-        # 每500步打印进度
         if (step + 1) % 500 == 0:
             progress = (step + 1) / args_cli.eval_steps * 100
             print(f"进度: {progress:.1f}% ({step+1}/{args_cli.eval_steps})")
 
-    # 计算最终指标
-    velocity_errors = np.concatenate(velocity_errors, axis=0)  # (total_steps, 2)
-    orientation_errors = np.concatenate(orientation_errors, axis=0)  # (total_steps, 2)
+    # 计算结果
+    velocity_errors = np.concatenate(velocity_errors, axis=0)
+    orientation_errors = np.concatenate(orientation_errors, axis=0)
 
-    # 统计结果
     lin_vel_mse = np.mean(velocity_errors[:, 0])
     ang_vel_mse = np.mean(velocity_errors[:, 1])
     total_vel_mse = np.mean(velocity_errors)
@@ -157,7 +173,7 @@ def main():
 
     print(f"\n{'='*80}\n")
 
-    # 保存结果到CSV
+    # 保存CSV
     results_df = pd.DataFrame({
         'Metric': [
             'Linear Velocity MSE (m²/s²)',
@@ -183,7 +199,7 @@ def main():
         ]
     })
 
-    output_dir = os.path.dirname(resume_path)
+    output_dir = os.path.dirname(checkpoint_path)
     output_file = os.path.join(output_dir, "evaluation_results.csv")
     results_df.to_csv(output_file, index=False)
     print(f"✅ 结果已保存到 / Results saved to: {output_file}\n")
