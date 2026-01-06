@@ -50,4 +50,3 @@ _build
 
 # 训练进程文件
 **/*_pid.txt
-EOF
