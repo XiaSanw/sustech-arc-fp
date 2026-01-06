@@ -377,22 +377,22 @@ class EventsCfg:
     push_robot = EventTerm(
         func=mdp.apply_external_force_torque_stochastic,  # 随机外力扰动 / Stochastic external force disturbance
         mode="interval",                            # 间隔模式 / Interval mode
-        interval_range_s=(5.0, 10.0),               # 间隔时间范围 / Interval time range
-        params={
+        interval_range_s=(4.0, 6.0),               # 间隔时间范围 / Interval time range
+        params={            #5 - 10. --- 4 6
             "asset_cfg": SceneEntityCfg("robot", body_names="base_Link"),
             # 力的范围 [N] / Force range [N]
           "force_range": {
-              "x": (-600.0, 600.0),  # 增大到800N（更强的推力）
-              "y": (-600.0, 600.0),
+              "x": (-700.0, 700.0),  # 增大到700N（更强的推力）
+              "y": (-700.0, 700.0),
               "z": (-0.0, 0.0),
           },
             # 力矩范围 [N⋅m] / Torque range [N⋅m]
           "torque_range": {
-              "x": (-60.0, 60.0),    # 增大到80N⋅m
-              "y": (-60.0, 60.0),
+              "x": (-70.0, 70.0),    # 增大到70N⋅m
+              "y": (-70.0, 70.0),
               "z": (-0.0, 0.0)
           },            
-          "probability": 0.3,                   # 发生概率 / Occurrence probability
+          "probability": 0.5,                   # 发生概率 / Occurrence probability 0.3 - 0.
         },
         is_global_time=False,
         min_step_count_between_reset=0,
@@ -411,25 +411,25 @@ class RewardsCfg:
 
     # tracking related rewards
     rew_lin_vel_xy = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=8.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 从3 改到8
+        func=mdp.track_lin_vel_xy_exp, weight=4.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 从3 - 4
     rew_ang_vel_z = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=4.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 从1，5改到4
+        func=mdp.track_ang_vel_z_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 从1，5改到2
 
     # 调节相关奖励 / Regulation-related rewards
     pen_base_height = RewTerm(
         func=mdp.base_com_height,                   # 基座高度惩罚 / Base height penalty
         params={"target_height": 0.78},            # 目标高度 78cm / Target height 78cm
-        weight=-20.0,                               # 负权重表示惩罚 / Negative weight indicates penalty
+        weight=-15.0,                               # 负权重表示惩罚 / Negative weight indicates penalty
     )
     
     # 关节相关惩罚 / Joint-related penalties
     pen_lin_vel_z = RewTerm(func=mdp.lin_vel_z_l2, weight=-0.5)
-    pen_ang_vel_xy = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
+    pen_ang_vel_xy = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.1)
     pen_joint_torque = RewTerm(func=mdp.joint_torques_l2, weight=-0.00008)
     pen_joint_accel = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-07)
-    pen_action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.005) # 0.03-0.005
+    pen_action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.002) # 0.03-0.005-0.002
     pen_joint_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-2.0)
     pen_joint_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-1e-03)
     pen_joint_powers = RewTerm(func=mdp.joint_powers_l1, weight=-5e-04)
@@ -446,15 +446,15 @@ class RewardsCfg:
 
     pen_action_smoothness = RewTerm(
         func=mdp.ActionSmoothnessPenalty,           # 动作平滑性惩罚 / Action smoothness penalty
-        weight=-0.005    #-0，04 - 0.005
+        weight=-0.002    #-0，04 - 0.005 - 0.002
     )
     pen_flat_orientation = RewTerm(
         func=mdp.flat_orientation_l2,               # 平坦朝向L2惩罚 / Flat orientation L2 penalty
-        weight=-10.0
+        weight=-15.0
     )
     pen_feet_distance = RewTerm(
         func=mdp.feet_distance,                     # 足部距离惩罚 / Foot distance penalty
-        weight=-100,
+        weight=-10, #-100 - -10
         params={
             "min_feet_distance": 0.115,            # 最小足部距离 / Minimum foot distance
             "feet_links_name": ["foot_[RL]_Link"]  # 足部连杆名称 / Foot link names
