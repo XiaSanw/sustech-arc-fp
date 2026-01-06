@@ -50,3 +50,14 @@ _build
 
 # 训练进程文件
 **/*_pid.txt
+
+
+# 视频文件（如果有训练录制的视频）
+
+
+**/*.mp4
+**/*.avi
+# 数据文件
+**/data/
+# Jupyter notebook checkpoints
+**/.ipynb_checkpoints/
