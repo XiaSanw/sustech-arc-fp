@@ -429,7 +429,7 @@ class RewardsCfg:
     pen_ang_vel_xy = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
     pen_joint_torque = RewTerm(func=mdp.joint_torques_l2, weight=-0.00008)
     pen_joint_accel = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-07)
-    pen_action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.03)
+    pen_action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.005) # 0.03-0.005
     pen_joint_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-2.0)
     pen_joint_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-1e-03)
     pen_joint_powers = RewTerm(func=mdp.joint_powers_l1, weight=-5e-04)
@@ -446,7 +446,7 @@ class RewardsCfg:
 
     pen_action_smoothness = RewTerm(
         func=mdp.ActionSmoothnessPenalty,           # 动作平滑性惩罚 / Action smoothness penalty
-        weight=-0.04
+        weight=-0.005    #-0，04 - 0.005
     )
     pen_flat_orientation = RewTerm(
         func=mdp.flat_orientation_l2,               # 平坦朝向L2惩罚 / Flat orientation L2 penalty

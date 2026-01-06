@@ -6,6 +6,8 @@ import argparse
 import sys
 
 from isaaclab.app import AppLauncher
+import logging
+from pathlib import Path
 
 # local imports
 import cli_args  # isort: skip
@@ -70,6 +72,9 @@ torch.backends.cudnn.allow_tf32 = True
 torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = False
 
+# basic logging
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+
 # @hydra_task_config(args_cli.task, "rsl_rl_cfg_entry_point")
 def main():
     """使用RSL-RL智能体进行训练 / Train with RSL-RL agent."""
@@ -88,7 +93,7 @@ def main():
     # 指定日志实验目录 / Specify directory for logging experiments
     log_root_path = os.path.join("logs", "rsl_rl", agent_cfg.experiment_name)
     log_root_path = os.path.abspath(log_root_path)
-    print(f"[INFO] Logging experiment in directory: {log_root_path}")
+    logging.info(f"Logging experiment in directory: {log_root_path}")
 
     # 指定日志运行目录：{时间戳}_{运行名称} / Specify directory for logging runs: {time-stamp}_{run_name}
     log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -107,8 +112,10 @@ def main():
             "video_length": args_cli.video_length,
             "disable_logger": True,
         }
-        print("[INFO] Recording videos during training.")
+        logging.info("Recording videos during training.")
         print_dict(video_kwargs, nesting=4)
+        # ensure video folder exists before RecordVideo tries to write
+        Path(video_kwargs["video_folder"]).mkdir(parents=True, exist_ok=True)
         env = gym.wrappers.RecordVideo(env, **video_kwargs)
 
     # 如果RL算法需要，转换为单智能体实例 / Convert to single-agent instance if required by the RL algorithm
@@ -136,21 +143,33 @@ def main():
     # 设置环境种子 / Set seed of the environment
     env.seed(agent_cfg.seed)
 
-    # 将配置转储到日志目录中 / Dump the configuration into log-directory
+    # 确保日志目录与参数目录存在，然后将配置转储到日志目录中 / Ensure log dirs exist then dump configs
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
+    Path(os.path.join(log_dir, "params")).mkdir(parents=True, exist_ok=True)
     dump_yaml(os.path.join(log_dir, "params", "env.yaml"), env_cfg)
     dump_yaml(os.path.join(log_dir, "params", "agent.yaml"), agent_cfg)
     dump_pickle(os.path.join(log_dir, "params", "env.pkl"), env_cfg)
     dump_pickle(os.path.join(log_dir, "params", "agent.pkl"), agent_cfg)
 
-    # run training
-    runner.learn(num_learning_iterations=agent_cfg.max_iterations, init_at_random_ep_len=True)
-
-    # close the simulator
-    env.close()
+    # run training - ensure resources are cleaned up on errors
+    try:
+        runner.learn(num_learning_iterations=agent_cfg.max_iterations, init_at_random_ep_len=True)
+    finally:
+        try:
+            env.close()
+        except Exception:
+            logging.exception("Error while closing the environment")
 
 
 if __name__ == "__main__":
-    # run the main execution
-    main()
-    # close sim app
-    simulation_app.close()
+    # run the main execution and ensure simulation app is closed even if exceptions occur
+    try:
+        main()
+    except Exception:
+        logging.exception("Exception during training")
+        raise
+    finally:
+        try:
+            simulation_app.close()
+        except Exception:
+            logging.exception("Error while closing simulation app")
