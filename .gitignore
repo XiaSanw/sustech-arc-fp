@@ -18,9 +18,9 @@
 
 # Outputs
 **/runs/*
-# **/output/*
-# **/outputs/*
-# videos/*
+**/output/*
+**/outputs/*
+videos/*
 **/wandb/*
 **/.neptune/*
 docker/artifacts/
@@ -35,9 +35,9 @@ _build
 # ========== 训练相关补充 ==========
 
 # 模型文件（checkpoint）
-# **/*.pt
-# **/*.pth
-# **/*.onnx
+**/*.pt
+**/*.pth
+**/*.onnx
 
 # USD资产文件（3D模型资源，非常大）
 **/*.usd
@@ -45,8 +45,8 @@ _build
 **/*.usdc
 
 # 日志文件
-# **/*.log
-# **/nohup.out
+#  **/*.log
+**/nohup.out
 
 # 训练进程文件
 **/*_pid.txt
