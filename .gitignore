@@ -38,26 +38,38 @@ _build
 **/*.pt
 **/*.pth
 **/*.onnx
+**/*.pkl
 
 # USD资产文件（3D模型资源，非常大）
 **/*.usd
 **/*.usda
 **/*.usdc
 
+# 训练日志目录（重要！）
+logs/
+**/logs/**
+
 # 日志文件
-#  **/*.log
+**/*.log
 **/nohup.out
+
+# TensorBoard 事件文件
+**/events.out.tfevents.*
+
+# 训练参数文件
+**/params/*.yaml
+**/params/*.pkl
 
 # 训练进程文件
 **/*_pid.txt
 
-
 # 视频文件（如果有训练录制的视频）
-
-
 **/*.mp4
 **/*.avi
+**/*.meta.json
+
 # 数据文件
 **/data/
+
 # Jupyter notebook checkpoints
 **/.ipynb_checkpoints/
