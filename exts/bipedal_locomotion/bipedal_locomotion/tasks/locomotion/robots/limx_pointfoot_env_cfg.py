@@ -251,3 +251,25 @@ class PFStairEnvCfgv1_PLAY(PFBaseEnvCfg_PLAY):
         self.scene.terrain.terrain_type = "generator"
         self.scene.terrain.max_init_terrain_level = None
         self.scene.terrain.terrain_generator = STAIRS_TERRAINS_PLAY_CFG.replace(difficulty_range=(0.5, 0.5))
+
+
+#############################
+# 双足机器人抗干扰演示环境 / Pointfoot Disturbance Rejection Demo Environment
+#############################
+
+@configclass
+class PFBlindFlatDemoEnvCfg(PFBlindFlatEnvCfg):
+    """平地抗干扰演示环境 - 用于展示鲁棒性 / Flat terrain demo environment - for robustness demonstration"""
+
+    def __post_init__(self):
+        super().__post_init__()
+
+        # 小场景以便观察 / Smaller scene for better observation
+        self.scene.num_envs = 16
+
+        # 禁用观测噪声，使演示更清晰 / Disable observation noise for clearer demonstration
+        self.observations.policy.enable_corruption = False
+
+        # 增强外力推动的可见性 / Enhance visibility of external forces
+        self.events.push_robot.interval_range_s = (2.0, 3.0)  # 更频繁：2-3秒
+        self.events.push_robot.params["probability"] = 0.9    # 更高概率：90%

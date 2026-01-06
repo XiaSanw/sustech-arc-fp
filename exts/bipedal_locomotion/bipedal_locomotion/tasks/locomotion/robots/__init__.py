@@ -89,3 +89,16 @@ gym.register(
         "rsl_rl_cfg_entry_point": limx_sf_blind_flat_runner_cfg,
     },
 )
+
+#################################
+# PF Blind Flat Demo Environment (用于展示抗干扰)
+#################################
+gym.register(
+    id="Isaac-Limx-PF-Blind-Flat-Demo-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": limx_pointfoot_env_cfg.PFBlindFlatDemoEnvCfg,
+        "rsl_rl_cfg_entry_point": limx_pf_blind_flat_runner_cfg,
+    },
+)
