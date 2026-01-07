@@ -382,16 +382,16 @@ class EventsCfg:
             "asset_cfg": SceneEntityCfg("robot", body_names="base_Link"),
             # 力的范围 [N] / Force range [N]
           "force_range": {
-              "x": (-700.0, 700.0),  # 增大到700N（更强的推力）
-              "y": (-700.0, 700.0),
+              "x": (-350.0, 350.0),  # 调整到350N（平衡速度跟踪与抗干扰）
+              "y": (-350.0, 350.0),
               "z": (-0.0, 0.0),
           },
             # 力矩范围 [N⋅m] / Torque range [N⋅m]
           "torque_range": {
-              "x": (-70.0, 70.0),    # 增大到70N⋅m
-              "y": (-70.0, 70.0),
+              "x": (-40.0, 40.0),    # 调整到40N⋅m
+              "y": (-40.0, 40.0),
               "z": (-0.0, 0.0)
-          },            
+          },
           "probability": 0.5,                   # 发生概率 / Occurrence probability 0.3 - 0.
         },
         is_global_time=False,
