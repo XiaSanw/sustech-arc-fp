@@ -43,7 +43,7 @@ class PFPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 @configclass
 class PF_TRON1AFlatPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 3000         # 较短的训练周期，适合平地环境 / Shorter training for flat terrain
+    max_iterations = 5000         # 延长训练周期以适应可学习编码器 / Extended training for learnable encoder (方案B优化)
     save_interval = 200           # 更频繁的保存 / More frequent saving
     experiment_name = "pf_tron_1a_flat"
     empirical_normalization = False
@@ -75,7 +75,7 @@ class PF_TRON1AFlatPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     # 编码器配置 - 用于处理历史观测信息
     # Encoder configuration - for processing history observation information
     encoder = EncoderCfg(
-        output_detach=True,       # 输出分离，防止梯度回传 / Detach output to prevent gradient flow
+        output_detach=False,      # 允许梯度回传，使编码器可学习 / Allow gradient flow for learnable encoder (方案B优化)
         num_output_dim=3,         # 输出维度 / Output dimensions
         hidden_dims=[256, 128],   # 编码器隐藏层 / Encoder hidden dimensions
         activation="elu",         # 激活函数 / Activation function
