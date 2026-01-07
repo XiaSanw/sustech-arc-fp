@@ -382,17 +382,17 @@ class EventsCfg:
             "asset_cfg": SceneEntityCfg("robot", body_names="base_Link"),
             # 力的范围 [N] / Force range [N]
           "force_range": {
-              "x": (-350.0, 350.0),  # 调整到350N（平衡速度跟踪与抗干扰）
-              "y": (-350.0, 350.0),
+              "x": (-300.0, 300.0),  # 调整到300N（保守但合理的强度）
+              "y": (-300.0, 300.0),
               "z": (-0.0, 0.0),
           },
             # 力矩范围 [N⋅m] / Torque range [N⋅m]
           "torque_range": {
-              "x": (-40.0, 40.0),    # 调整到40N⋅m
-              "y": (-40.0, 40.0),
+              "x": (-35.0, 35.0),    # 调整到35N⋅m
+              "y": (-35.0, 35.0),
               "z": (-0.0, 0.0)
           },
-          "probability": 0.5,                   # 发生概率 / Occurrence probability 0.3 - 0.
+          "probability": 0.6,                   # 发生概率 / Occurrence probability，从0.5提高到0.6
         },
         is_global_time=False,
         min_step_count_between_reset=0,
@@ -411,22 +411,22 @@ class RewardsCfg:
 
     # tracking related rewards
     rew_lin_vel_xy = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=4.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 从3 - 4
+        func=mdp.track_lin_vel_xy_exp, weight=3.5, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 从4.0 → 3.5，适当降低优先级
     rew_ang_vel_z = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 从1，5改到2
+        func=mdp.track_ang_vel_z_exp, weight=1.5, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 从2.0 → 1.5
 
     # 调节相关奖励 / Regulation-related rewards
     pen_base_height = RewTerm(
         func=mdp.base_com_height,                   # 基座高度惩罚 / Base height penalty
         params={"target_height": 0.78},            # 目标高度 78cm / Target height 78cm
-        weight=-15.0,                               # 负权重表示惩罚 / Negative weight indicates penalty
+        weight=-20.0,                               # 负权重表示惩罚 / Negative weight indicates penalty
     )
-    
+
     # 关节相关惩罚 / Joint-related penalties
     pen_lin_vel_z = RewTerm(func=mdp.lin_vel_z_l2, weight=-0.5)
-    pen_ang_vel_xy = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.1)
+    pen_ang_vel_xy = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.15)
     pen_joint_torque = RewTerm(func=mdp.joint_torques_l2, weight=-0.00008)
     pen_joint_accel = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-07)
     pen_action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.002) # 0.03-0.005-0.002
@@ -450,7 +450,7 @@ class RewardsCfg:
     )
     pen_flat_orientation = RewTerm(
         func=mdp.flat_orientation_l2,               # 平坦朝向L2惩罚 / Flat orientation L2 penalty
-        weight=-15.0
+        weight=-20.0
     )
     pen_feet_distance = RewTerm(
         func=mdp.feet_distance,                     # 足部距离惩罚 / Foot distance penalty
