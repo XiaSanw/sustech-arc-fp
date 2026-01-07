@@ -102,3 +102,49 @@ gym.register(
         "rsl_rl_cfg_entry_point": limx_pf_blind_flat_runner_cfg,
     },
 )
+
+#################################
+# PF Blind Rough Environment (任务2.4 - 粗糙地形)
+#################################
+gym.register(
+    id="Isaac-Limx-PF-Blind-Rough-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": limx_pointfoot_env_cfg.PFBlindRoughEnvCfg,
+        "rsl_rl_cfg_entry_point": limx_pf_blind_flat_runner_cfg,
+    },
+)
+
+gym.register(
+    id="Isaac-Limx-PF-Blind-Rough-Play-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": limx_pointfoot_env_cfg.PFBlindRoughEnvCfg_PLAY,
+        "rsl_rl_cfg_entry_point": limx_pf_blind_flat_runner_cfg,
+    },
+)
+
+#################################
+# PF Blind Stairs Environment (任务2.4 - 楼梯地形)
+#################################
+gym.register(
+    id="Isaac-Limx-PF-Blind-Stairs-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": limx_pointfoot_env_cfg.PFBlindStairEnvCfg,
+        "rsl_rl_cfg_entry_point": limx_pf_blind_flat_runner_cfg,
+    },
+)
+
+gym.register(
+    id="Isaac-Limx-PF-Blind-Stairs-Play-v0",
+    entry_point="isaaclab.envs:ManagerBasedRLEnv",
+    disable_env_checker=True,
+    kwargs={
+        "env_cfg_entry_point": limx_pointfoot_env_cfg.PFBlindStairEnvCfg_PLAY,
+        "rsl_rl_cfg_entry_point": limx_pf_blind_flat_runner_cfg,
+    },
+)

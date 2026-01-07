@@ -411,17 +411,17 @@ class RewardsCfg:
 
     # tracking related rewards
     rew_lin_vel_xy = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=6.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 从3.5 → 6.0，提升速度跟踪优先级（任务2.2核心指标）
+        func=mdp.track_lin_vel_xy_exp, weight=8.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 从3.5 → 6.0 → 8.0，进一步提升速度跟踪优先级（解决保守策略问题）
     rew_ang_vel_z = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 从1.5 → 3.0，强化转向控制
+        func=mdp.track_ang_vel_z_exp, weight=4.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 从1.5 → 3.0 → 4.0，进一步强化转向控制
 
     # 调节相关奖励 / Regulation-related rewards
     pen_base_height = RewTerm(
         func=mdp.base_com_height,                   # 基座高度惩罚 / Base height penalty
         params={"target_height": 0.78},            # 目标高度 78cm / Target height 78cm
-        weight=-18.0,                               # 从-20.0 → -18.0，适当降低以平衡速度跟踪
+        weight=-15.0,                               # 从-20.0 → -18.0 → -15.0，降低以鼓励动态运动
     )
 
     # 关节相关惩罚 / Joint-related penalties
@@ -450,7 +450,7 @@ class RewardsCfg:
     )
     pen_flat_orientation = RewTerm(
         func=mdp.flat_orientation_l2,               # 平坦朝向L2惩罚 / Flat orientation L2 penalty
-        weight=-18.0                                 # 从-20.0 → -18.0，平衡速度与稳定性
+        weight=-15.0                                 # 从-20.0 → -18.0 → -15.0，降低以允许动态姿态调整
     )
     pen_feet_distance = RewTerm(
         func=mdp.feet_distance,                     # 足部距离惩罚 / Foot distance penalty
