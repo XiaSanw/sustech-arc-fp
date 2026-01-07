@@ -45,16 +45,16 @@ _build
 **/*.usda
 **/*.usdc
 
-# 训练日志目录（重要！）
-logs/
-**/logs/**
+# 训练日志目录（允许 TensorBoard 日志提交）
+# logs/  # 注释掉，允许提交
+# **/logs/**  # 注释掉，允许提交
 
-# 日志文件
-**/*.log
-**/nohup.out
+# 日志文件（允许提交用于本地查看）
+# **/*.log  # 注释掉，允许提交
+# **/nohup.out  # 注释掉，允许提交
 
-# TensorBoard 事件文件
-**/events.out.tfevents.*
+# TensorBoard 事件文件（允许提交）
+# **/events.out.tfevents.*  # 注释掉，允许提交
 
 # 训练参数文件
 **/params/*.yaml
