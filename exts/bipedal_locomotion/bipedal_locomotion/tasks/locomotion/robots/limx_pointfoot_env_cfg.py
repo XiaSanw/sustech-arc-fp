@@ -270,6 +270,6 @@ class PFBlindFlatDemoEnvCfg(PFBlindFlatEnvCfg):
         # 禁用观测噪声，使演示更清晰 / Disable observation noise for clearer demonstration
         self.observations.policy.enable_corruption = False
 
-        # 增强外力推动的可见性 / Enhance visibility of external forces
-        self.events.push_robot.interval_range_s = (2.0, 3.0)  # 更频繁：2-3秒
-        self.events.push_robot.params["probability"] = 0.9    # 更高概率：90%
+        # 外力推动配置（匹配训练环境） / External force configuration (matching training environment)
+        self.events.push_robot.interval_range_s = (4.0, 6.0)  # 匹配训练：4-6秒
+        self.events.push_robot.params["probability"] = 0.6    # 匹配训练：60%
