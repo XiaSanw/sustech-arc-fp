@@ -270,17 +270,17 @@ class PFBlindFlatDemoEnvCfg(PFBlindFlatEnvCfg):
         # 禁用观测噪声，使演示更清晰 / Disable observation noise for clearer demonstration
         self.observations.policy.enable_corruption = False
 
-        # 外力推动配置（轻度外力用于测试） / External force configuration (light force for testing)
+        # 外力推动配置（中等外力用于测试） / External force configuration (moderate force for testing)
         self.events.push_robot.interval_range_s = (4.0, 6.0)  # 匹配训练：4-6秒
         self.events.push_robot.params["probability"] = 0.6    # 匹配训练：60%
-        # 轻度推力（50N）用于录制视频测试 / Light force (50N) for video recording test
+        # 中等推力（200N）用于录制视频测试 / Moderate force (200N) for video recording test
         self.events.push_robot.params["force_range"] = {
-            "x": (-50.0, 50.0),    # 50N（轻度测试）
-            "y": (-50.0, 50.0),
+            "x": (-200.0, 200.0),  # 200N（中等测试强度）
+            "y": (-200.0, 200.0),
             "z": (0.0, 0.0),
         }
         self.events.push_robot.params["torque_range"] = {
-            "x": (-6.0, 6.0),      # 相应降低力矩（50/300 * 35 ≈ 6）
-            "y": (-6.0, 6.0),
+            "x": (-23.0, 23.0),    # 相应调整力矩（200/300 * 35 ≈ 23）
+            "y": (-23.0, 23.0),
             "z": (0.0, 0.0),
         }
