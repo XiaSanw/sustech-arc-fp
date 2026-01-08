@@ -411,8 +411,8 @@ class RewardsCfg:
 
     # tracking related rewards
     rew_lin_vel_xy = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=6.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 第03版稳定配置：从3.5 → 6.0，提升速度跟踪优先级（任务2.2核心指标）
+        func=mdp.track_lin_vel_xy_exp, weight=4.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 粗糙地形优化：从6.0 → 4.0，降低速度优先级，专注地形适应
     rew_ang_vel_z = RewTerm(
         func=mdp.track_ang_vel_z_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
     ) # 第03版稳定配置：从1.5 → 3.0，强化转向控制
@@ -450,7 +450,7 @@ class RewardsCfg:
     )
     pen_flat_orientation = RewTerm(
         func=mdp.flat_orientation_l2,               # 平坦朝向L2惩罚 / Flat orientation L2 penalty
-        weight=-18.0                                 # 第03版稳定配置：从-20.0 → -18.0，平衡速度与稳定性
+        weight=-10.0                                 # 粗糙地形优化：从-18.0 → -10.0，允许姿态变化适应地形
     )
     pen_feet_distance = RewTerm(
         func=mdp.feet_distance,                     # 足部距离惩罚 / Foot distance penalty
