@@ -411,11 +411,11 @@ class RewardsCfg:
 
     # tracking related rewards
     rew_lin_vel_xy = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 粗糙地形v5修正：从4.0 → 3.0，适度降低速度优先级（而非激进到2.5）
+        func=mdp.track_lin_vel_xy_exp, weight=4.5, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 粗糙地形v6优化：从3.0 → 4.5，提升速度追踪优先级（迭代1700数据显示生存率97-99%，可承受更高速度要求）
     rew_ang_vel_z = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 粗糙地形v5修正：从3.0 → 2.0，同步适度降低
+        func=mdp.track_ang_vel_z_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 粗糙地形v6优化：从2.0 → 3.0，强化转向跟踪
 
     # 调节相关奖励 / Regulation-related rewards
     pen_base_height = RewTerm(
