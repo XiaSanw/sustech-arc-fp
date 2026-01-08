@@ -117,7 +117,7 @@ class PFBlindRoughEnvCfg(PFBaseEnvCfg):
 class PFBlindRoughEnvCfg_PLAY(PFBaseEnvCfg_PLAY):
     def __post_init__(self):
         super().__post_init__()
-        
+
         self.scene.height_scanner = None
         self.observations.policy.heights = None
         self.observations.critic.heights = None
@@ -126,6 +126,10 @@ class PFBlindRoughEnvCfg_PLAY(PFBaseEnvCfg_PLAY):
         self.scene.terrain.terrain_type = "generator"
         self.scene.terrain.max_init_terrain_level = None
         self.scene.terrain.terrain_generator = BLIND_ROUGH_TERRAINS_PLAY_CFG
+
+        # 配置相机以确保机器人可见 / Configure camera to ensure robot is visible
+        self.viewer.eye = (7.5, 7.5, 7.5)      # 相机位置 / Camera position
+        self.viewer.lookat = (0.0, 0.0, 0.0)   # 注视点：场景中心 / Look-at point: scene center
 
 
 ##############################
