@@ -411,25 +411,25 @@ class RewardsCfg:
 
     # tracking related rewards
     rew_lin_vel_xy = RewTerm(
-        func=mdp.track_lin_vel_xy_exp, weight=4.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 粗糙地形优化：从6.0 → 4.0，降低速度优先级，专注地形适应
+        func=mdp.track_lin_vel_xy_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 粗糙地形v5修正：从4.0 → 3.0，适度降低速度优先级（而非激进到2.5）
     rew_ang_vel_z = RewTerm(
-        func=mdp.track_ang_vel_z_exp, weight=3.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
-    ) # 第03版稳定配置：从1.5 → 3.0，强化转向控制
+        func=mdp.track_ang_vel_z_exp, weight=2.0, params={"command_name": "base_velocity", "std": math.sqrt(0.2)}
+    ) # 粗糙地形v5修正：从3.0 → 2.0，同步适度降低
 
     # 调节相关奖励 / Regulation-related rewards
     pen_base_height = RewTerm(
         func=mdp.base_com_height,                   # 基座高度惩罚 / Base height penalty
         params={"target_height": 0.78},            # 目标高度 78cm / Target height 78cm
-        weight=-2.0,                                # 粗糙地形优化：从-5.0 → -2.0，大幅放松高度约束（台阶仅1-4cm）
+        weight=-2.0,                                # 粗糙地形v5修正：保持-2.0（v4数据显示再降低无效，核心是预训练模型问题）
     )
 
     # 关节相关惩罚 / Joint-related penalties
-    pen_lin_vel_z = RewTerm(func=mdp.lin_vel_z_l2, weight=-0.5)
-    pen_ang_vel_xy = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.15)
+    pen_lin_vel_z = RewTerm(func=mdp.lin_vel_z_l2, weight=-1.0)  # 粗糙地形v5：从-0.5 → -1.0，防止跳跃（保留）
+    pen_ang_vel_xy = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.10)  # 粗糙地形v5修正：从-0.15 → -0.10，适度放宽Roll/Pitch
     pen_joint_torque = RewTerm(func=mdp.joint_torques_l2, weight=-0.00008)
     pen_joint_accel = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-07)
-    pen_action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.002) # 0.03-0.005-0.002
+    pen_action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.005)  # 粗糙地形v5修正：从-0.002 → -0.005，适度允许快速反应
     pen_joint_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=-2.0)
     pen_joint_vel_l2 = RewTerm(func=mdp.joint_vel_l2, weight=-1e-03)
     pen_joint_powers = RewTerm(func=mdp.joint_powers_l1, weight=-5e-04)
@@ -450,7 +450,7 @@ class RewardsCfg:
     )
     pen_flat_orientation = RewTerm(
         func=mdp.flat_orientation_l2,               # 平坦朝向L2惩罚 / Flat orientation L2 penalty
-        weight=-5.0                                  # 粗糙地形第二次优化：从-10.0 → -5.0，参考楼梯配置-2.5
+        weight=-5.0                                  # 粗糙地形v5修正：保持-5.0（v3数据显示已允许4.8度倾斜，足够应对1-4cm台阶）
     )
     pen_feet_distance = RewTerm(
         func=mdp.feet_distance,                     # 足部距离惩罚 / Foot distance penalty
