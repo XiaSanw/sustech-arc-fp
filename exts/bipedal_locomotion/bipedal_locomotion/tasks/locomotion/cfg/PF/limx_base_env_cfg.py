@@ -450,7 +450,7 @@ class RewardsCfg:
     )
     pen_flat_orientation = RewTerm(
         func=mdp.flat_orientation_l2,               # 平坦朝向L2惩罚 / Flat orientation L2 penalty
-        weight=-10.0                                 # 粗糙地形优化：从-18.0 → -10.0，允许姿态变化适应地形
+        weight=-5.0                                  # 粗糙地形第二次优化：从-10.0 → -5.0，参考楼梯配置-2.5
     )
     pen_feet_distance = RewTerm(
         func=mdp.feet_distance,                     # 足部距离惩罚 / Foot distance penalty
