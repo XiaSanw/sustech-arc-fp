@@ -421,7 +421,7 @@ class RewardsCfg:
     pen_base_height = RewTerm(
         func=mdp.base_com_height,                   # 基座高度惩罚 / Base height penalty
         params={"target_height": 0.78},            # 目标高度 78cm / Target height 78cm
-        weight=-18.0,                               # 第03版稳定配置：从-20.0 → -18.0，适当降低以平衡速度跟踪
+        weight=-5.0,                                # 楼梯专用：从-18.0 → -5.0，允许大幅度高度变化（台阶5-20cm）
     )
 
     # 关节相关惩罚 / Joint-related penalties
