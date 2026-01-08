@@ -127,11 +127,11 @@ class PFBlindRoughEnvCfg_PLAY(PFBaseEnvCfg_PLAY):
         self.scene.terrain.max_init_terrain_level = None
         self.scene.terrain.terrain_generator = BLIND_ROUGH_TERRAINS_PLAY_CFG
 
-        # 配置相机跟随第一个环境的机器人 / Configure camera to follow first environment robot
+        # 配置相机确保机器人可见（俯视角度，较远距离）/ Configure camera to ensure robot visibility (bird's eye view, moderate distance)
         self.viewer.origin_type = "env"        # 相机跟随环境 / Camera follows environment
         self.viewer.env_index = 0              # 跟随第0个环境 / Follow environment 0
-        self.viewer.eye = (3.0, 3.0, 2.5)      # 相机相对机器人的位置 / Camera position relative to robot
-        self.viewer.lookat = (0.0, 0.0, 0.5)   # 注视点：机器人腰部 / Look-at point: robot waist
+        self.viewer.eye = (5.0, 5.0, 5.0)      # 相机位置：对角线上方5米 / Camera position: 5m diagonal above
+        self.viewer.lookat = (0.0, 0.0, 0.0)   # 注视点：环境中心 / Look-at point: environment center
 
 
 ##############################
