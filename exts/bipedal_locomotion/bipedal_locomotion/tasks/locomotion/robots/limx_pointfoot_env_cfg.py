@@ -130,7 +130,7 @@ class PFBlindRoughEnvCfg_PLAY(PFBaseEnvCfg_PLAY):
         # 配置相机确保机器人可见（超高空俯视，倾斜视角，适配72个环境）/ Configure camera to ensure robot visibility (ultra-high altitude tilted view, optimized for 72 environments)
         self.viewer.origin_type = "world"      # 相机固定在世界坐标系 / Camera fixed in world coordinates
         self.viewer.eye = (0.0, 0.0, 22.0)     # 相机位置：正上方30米高 / Camera position: 30m directly above (doubled from 15m)
-        self.viewer.lookat = (8.0, 0.0, 1.0)  # 注视点：前方15米地面（约26.5度向下倾斜）/ Look-at point: 15m forward on ground (approx 26.5° downward tilt)
+        self.viewer.lookat = (6.0, 0.0, 2.0)  # 注视点：前方15米地面（约26.5度向下倾斜）/ Look-at point: 15m forward on ground (approx 26.5° downward tilt)
 
 
 ##############################
